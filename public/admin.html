@@ -1,0 +1,528 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>FGC Admin</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <style>
+      @keyframes floaty {
+        0%,
+        100% {
+          transform: translateY(0px);
+        }
+        50% {
+          transform: translateY(-10px);
+        }
+      }
+
+      .floaty {
+        animation: floaty 6s ease-in-out infinite;
+      }
+
+      :root {
+        color-scheme: dark;
+      }
+
+      body[data-theme="light"] {
+        color-scheme: light;
+        background: #f8fafc;
+      }
+
+      body[data-theme="light"] .theme-panel {
+        background: rgba(255, 255, 255, 0.9) !important;
+        border-color: #cbd5e1 !important;
+        box-shadow: 0 24px 60px rgba(15, 23, 42, 0.08) !important;
+      }
+
+      body[data-theme="light"] .theme-panel-soft {
+        background: #f1f5f9 !important;
+        border-color: #cbd5e1 !important;
+      }
+
+      body[data-theme="light"] .theme-input {
+        background: rgba(255, 255, 255, 0.95) !important;
+        border-color: #cbd5e1 !important;
+        color: #0f172a !important;
+      }
+
+      body[data-theme="light"] .theme-title {
+        color: #0f172a !important;
+      }
+
+      body[data-theme="light"] .theme-copy {
+        color: #334155 !important;
+      }
+
+      body[data-theme="light"] .theme-panel .text-white,
+      body[data-theme="light"] .theme-panel .text-slate-100 {
+        color: #0f172a !important;
+      }
+
+      body[data-theme="light"] .theme-panel .text-slate-200,
+      body[data-theme="light"] .theme-panel .text-slate-300 {
+        color: #1e293b !important;
+      }
+
+      body[data-theme="light"] .theme-panel .text-slate-400,
+      body[data-theme="light"] .theme-panel .text-slate-500,
+      body[data-theme="light"] .theme-panel .text-slate-600 {
+        color: #475569 !important;
+      }
+    </style>
+  </head>
+  <body
+    data-theme="dark"
+    class="min-h-screen overflow-x-hidden bg-slate-950 text-slate-100 antialiased"
+  >
+    <div class="pointer-events-none absolute inset-0 overflow-hidden">
+      <div
+        class="absolute -top-24 left-1/4 h-72 w-72 rounded-full bg-cyan-500/20 blur-3xl"
+      ></div>
+      <div
+        class="absolute top-1/3 right-1/5 h-80 w-80 rounded-full bg-indigo-500/20 blur-3xl"
+      ></div>
+      <div
+        class="absolute -bottom-16 left-1/3 h-64 w-64 rounded-full bg-emerald-500/10 blur-3xl"
+      ></div>
+    </div>
+
+    <main
+      class="relative mx-auto flex min-h-screen w-full max-w-7xl items-center justify-center px-4 py-10"
+    >
+      <div class="grid w-full gap-6 lg:grid-cols-[1.05fr_0.95fr]">
+        <section
+          class="theme-panel floaty rounded-[2rem] border border-slate-800/80 bg-slate-900/70 p-8 shadow-2xl shadow-slate-950/40 backdrop-blur-xl"
+        >
+          <div id="login-intro-panel">
+            <p
+              class="text-xs font-semibold uppercase tracking-[0.3em] text-cyan-300"
+            >
+              Admin Console
+            </p>
+            <h1
+              class="theme-title mt-4 text-4xl font-black tracking-tight text-white md:text-5xl"
+            >
+              Secure access for lottery management.
+            </h1>
+            <p
+              class="theme-copy mt-4 max-w-xl text-sm leading-6 text-slate-300 md:text-base"
+            >
+              Sign in to manage database-backed admin data through the API. This
+              page keeps the session alive in SQLite so future dashboard data
+              can be loaded without re-authentication.
+            </p>
+
+            <div class="mt-8 grid gap-4 md:grid-cols-2">
+              <div
+                class="theme-panel-soft rounded-2xl border border-slate-800 bg-slate-950/60 p-4"
+              >
+                <p class="text-xs uppercase tracking-[0.25em] text-slate-500">
+                  Session
+                </p>
+                <p class="mt-2 text-lg font-semibold text-white">Persistent</p>
+                <p class="mt-1 text-sm text-slate-400">
+                  Stored in the SQLite session table.
+                </p>
+              </div>
+              <div
+                class="theme-panel-soft rounded-2xl border border-slate-800 bg-slate-950/60 p-4"
+              >
+                <p class="text-xs uppercase tracking-[0.25em] text-slate-500">
+                  API
+                </p>
+                <p class="mt-2 text-lg font-semibold text-white">Same origin</p>
+                <p class="mt-1 text-sm text-slate-400">
+                  Admin page talks to protected endpoints.
+                </p>
+              </div>
+            </div>
+
+            <div
+              class="theme-panel-soft mt-8 rounded-2xl border border-dashed border-slate-700 bg-slate-950/30 p-4 text-sm text-slate-400"
+            >
+              Admin credentials are configured on the server and are not exposed
+              in the public interface.
+            </div>
+          </div>
+
+          <div id="dashboard-left-panel" class="hidden space-y-4">
+            <div
+              class="theme-panel-soft rounded-2xl border border-slate-800 bg-slate-950/60 p-5"
+            >
+              <p class="text-xs uppercase tracking-[0.25em] text-slate-500">
+                Protected API
+              </p>
+              <p id="secure-status-left" class="mt-2 text-sm text-slate-300">
+                Checking access...
+              </p>
+            </div>
+
+            <form
+              id="number-form"
+              class="theme-panel-soft rounded-2xl border border-slate-800 bg-slate-950/60 p-5 space-y-4"
+            >
+              <div class="flex items-center justify-between gap-4">
+                <div>
+                  <p class="text-xs uppercase tracking-[0.25em] text-slate-500">
+                    Lottery Numbers
+                  </p>
+                  <h3 class="mt-2 text-xl font-bold text-white">
+                    Insert numbers
+                  </h3>
+                </div>
+                <div
+                  class="theme-panel-soft rounded-2xl border border-slate-800 bg-slate-900 px-4 py-3 text-right"
+                >
+                  <p class="text-xs uppercase tracking-[0.2em] text-slate-500">
+                    Stored
+                  </p>
+                  <p
+                    id="number-total"
+                    class="mt-1 text-lg font-semibold text-white"
+                  >
+                    0
+                  </p>
+                </div>
+              </div>
+
+              <div>
+                <label
+                  for="insert-mode"
+                  class="mb-2 block text-sm font-medium text-slate-300"
+                  >Mode</label
+                >
+                <select
+                  id="insert-mode"
+                  class="theme-input w-full rounded-2xl border border-slate-700 bg-slate-950/70 px-4 py-3 text-white outline-none transition focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/30"
+                >
+                  <option value="single">Single number</option>
+                  <option value="range">Range</option>
+                </select>
+              </div>
+
+              <div id="single-number-group">
+                <label
+                  for="single-number"
+                  class="mb-2 block text-sm font-medium text-slate-300"
+                  >6-digit number</label
+                >
+                <input
+                  id="single-number"
+                  inputmode="numeric"
+                  maxlength="6"
+                  placeholder="000001"
+                  class="theme-input w-full rounded-2xl border border-slate-700 bg-slate-950/70 px-4 py-3 text-white outline-none transition placeholder:text-slate-600 focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/30"
+                />
+              </div>
+
+              <div id="range-group" class="hidden grid gap-4 md:grid-cols-2">
+                <div>
+                  <label
+                    for="range-start"
+                    class="mb-2 block text-sm font-medium text-slate-300"
+                    >First number</label
+                  >
+                  <input
+                    id="range-start"
+                    inputmode="numeric"
+                    maxlength="6"
+                    placeholder="000001"
+                    class="theme-input w-full rounded-2xl border border-slate-700 bg-slate-950/70 px-4 py-3 text-white outline-none transition placeholder:text-slate-600 focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/30"
+                  />
+                </div>
+                <div>
+                  <label
+                    for="range-end"
+                    class="mb-2 block text-sm font-medium text-slate-300"
+                    >Last number</label
+                  >
+                  <input
+                    id="range-end"
+                    inputmode="numeric"
+                    maxlength="6"
+                    placeholder="000120"
+                    class="theme-input w-full rounded-2xl border border-slate-700 bg-slate-950/70 px-4 py-3 text-white outline-none transition placeholder:text-slate-600 focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/30"
+                  />
+                </div>
+              </div>
+
+              <button
+                type="submit"
+                class="w-full rounded-2xl bg-gradient-to-r from-emerald-500 to-cyan-600 px-4 py-3 font-semibold text-white shadow-lg shadow-emerald-500/20 transition hover:from-emerald-400 hover:to-cyan-500 active:scale-[0.99]"
+              >
+                Insert into database
+              </button>
+
+              <p id="numbers-message" class="min-h-6 text-sm text-rose-300"></p>
+            </form>
+
+            <div
+              class="theme-panel-soft rounded-2xl border border-slate-800 bg-slate-950/60 p-5"
+            >
+              <div class="grid gap-4 lg:grid-cols-[1fr_auto] lg:items-end">
+                <div>
+                  <p class="text-xs uppercase tracking-[0.25em] text-slate-500">
+                    Saved numbers
+                  </p>
+                  <h3 class="mt-2 text-xl font-bold text-white">
+                    Toggle draw eligibility
+                  </h3>
+                </div>
+                <div class="flex flex-wrap items-center gap-2 lg:justify-end">
+                  <button
+                    id="reset-drawn-btn"
+                    type="button"
+                    class="rounded-2xl border border-rose-500/60 bg-rose-500/10 px-4 py-2 text-sm font-semibold text-rose-200 transition hover:bg-rose-500/20 hover:text-white"
+                  >
+                    Reset
+                  </button>
+                  <button
+                    id="clear-numbers-btn"
+                    type="button"
+                    class="rounded-2xl border border-rose-500 bg-rose-600 px-4 py-2 text-sm font-semibold text-white shadow-lg shadow-rose-500/20 transition hover:bg-rose-500"
+                  >
+                    Clear
+                  </button>
+                </div>
+              </div>
+
+              <div
+                class="mt-4 flex flex-col gap-3 md:flex-row md:items-end md:justify-between"
+              >
+                <div class="flex-1">
+                  <label
+                    for="number-search"
+                    class="mb-2 block text-sm font-medium text-slate-300"
+                    >Search numbers</label
+                  >
+                  <input
+                    id="number-search"
+                    type="search"
+                    placeholder="Find a number fast"
+                    class="theme-input w-full rounded-2xl border border-slate-700 bg-slate-950/70 px-4 py-3 text-white outline-none transition placeholder:text-slate-600 focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/30"
+                  />
+                </div>
+                <p id="number-count" class="text-sm text-slate-400 md:pb-3">
+                  0 records
+                </p>
+              </div>
+
+              <div id="number-list" class="mt-4 grid gap-3"></div>
+            </div>
+          </div>
+        </section>
+
+        <section
+          class="theme-panel rounded-[2rem] border border-slate-800/80 bg-slate-900/80 p-6 shadow-2xl shadow-slate-950/40 backdrop-blur-xl md:p-8"
+        >
+          <div id="login-panel">
+            <h2 class="text-2xl font-bold text-white">Login</h2>
+            <p class="mt-2 text-sm text-slate-400">
+              Use your admin credentials to unlock the dashboard.
+            </p>
+
+            <form id="login-form" class="mt-6 space-y-4">
+              <div>
+                <label
+                  for="username"
+                  class="mb-2 block text-sm font-medium text-slate-300"
+                  >Username</label
+                >
+                <input
+                  id="username"
+                  name="username"
+                  autocomplete="username"
+                  required
+                  class="theme-input w-full rounded-2xl border border-slate-700 bg-slate-950/70 px-4 py-3 text-white outline-none transition placeholder:text-slate-600 focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/30"
+                  placeholder="fgc-admin"
+                />
+              </div>
+              <div>
+                <label
+                  for="password"
+                  class="mb-2 block text-sm font-medium text-slate-300"
+                  >Password</label
+                >
+                <input
+                  id="password"
+                  name="password"
+                  type="password"
+                  autocomplete="current-password"
+                  required
+                  class="theme-input w-full rounded-2xl border border-slate-700 bg-slate-950/70 px-4 py-3 text-white outline-none transition placeholder:text-slate-600 focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/30"
+                  placeholder="Enter password"
+                />
+              </div>
+              <button
+                type="submit"
+                class="w-full rounded-2xl bg-gradient-to-r from-cyan-500 to-indigo-600 px-4 py-3 font-semibold text-white shadow-lg shadow-cyan-500/20 transition hover:from-cyan-400 hover:to-indigo-500 active:scale-[0.99]"
+              >
+                Sign In
+              </button>
+            </form>
+
+            <p id="auth-message" class="mt-4 min-h-6 text-sm text-rose-300"></p>
+          </div>
+
+          <div id="dashboard-panel" class="hidden">
+            <div class="flex items-start justify-between gap-4">
+              <div>
+                <p
+                  class="text-xs font-semibold uppercase tracking-[0.3em] text-emerald-300"
+                >
+                  Authenticated
+                </p>
+                <h2 class="mt-2 text-2xl font-bold text-white">
+                  Admin Dashboard
+                </h2>
+                <p id="session-user" class="mt-2 text-sm text-slate-400"></p>
+              </div>
+              <button
+                id="logout-btn"
+                class="rounded-2xl border border-slate-700 bg-slate-950/70 px-4 py-2 text-sm font-semibold text-slate-200 transition hover:border-slate-500 hover:text-white"
+              >
+                Log Out
+              </button>
+            </div>
+
+            <div class="mt-6 grid gap-4">
+              <div
+                class="theme-panel-soft rounded-2xl border border-slate-800 bg-slate-950/60 p-5"
+              >
+                <div class="flex items-center justify-between gap-4">
+                  <div>
+                    <p
+                      class="text-xs uppercase tracking-[0.25em] text-slate-500"
+                    >
+                      Protected API
+                    </p>
+                    <p id="secure-status" class="mt-2 text-sm text-slate-300">
+                      Checking access...
+                    </p>
+                  </div>
+                  <button
+                    id="theme-toggle-btn"
+                    type="button"
+                    class="rounded-2xl border border-slate-700 bg-slate-950/70 px-4 py-2 text-sm font-semibold text-slate-200 transition hover:border-slate-500 hover:text-white"
+                  >
+                    Light mode
+                  </button>
+                </div>
+              </div>
+
+              <form
+                id="constraint-form"
+                class="theme-panel-soft rounded-2xl border border-slate-800 bg-slate-950/60 p-5 space-y-4"
+              >
+                <div class="flex items-center justify-between gap-4">
+                  <div>
+                    <p
+                      class="text-xs uppercase tracking-[0.25em] text-slate-500"
+                    >
+                      Draw Constraint
+                    </p>
+                    <h3 class="mt-2 text-xl font-bold text-white">
+                      Limit winning number
+                    </h3>
+                  </div>
+                  <div
+                    class="theme-panel-soft rounded-2xl border border-slate-800 bg-slate-900 px-4 py-3 text-right"
+                  >
+                    <p
+                      class="text-xs uppercase tracking-[0.2em] text-slate-500"
+                    >
+                      Active
+                    </p>
+                    <p
+                      id="active-constraint-value"
+                      class="mt-1 text-lg font-semibold text-white"
+                    >
+                      None
+                    </p>
+                  </div>
+                </div>
+
+                <input type="hidden" id="constraint-id" value="" />
+
+                <div>
+                  <label
+                    for="constraint-max-number"
+                    class="mb-2 block text-sm font-medium text-slate-300"
+                    >Max 6-digit number</label
+                  >
+                  <input
+                    id="constraint-max-number"
+                    inputmode="numeric"
+                    maxlength="6"
+                    placeholder="999999"
+                    class="theme-input w-full rounded-2xl border border-slate-700 bg-slate-950/70 px-4 py-3 text-white outline-none transition placeholder:text-slate-600 focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/30"
+                  />
+                </div>
+
+                <label
+                  class="flex items-center gap-3 rounded-2xl border border-slate-800 bg-slate-950/40 px-4 py-3"
+                >
+                  <input
+                    id="constraint-active"
+                    type="checkbox"
+                    class="h-4 w-4 rounded border-slate-700 bg-slate-950 text-cyan-500 focus:ring-cyan-500"
+                    checked
+                  />
+                  <span class="text-sm text-slate-300"
+                    >Active constraint is used for draw limits</span
+                  >
+                </label>
+
+                <div class="flex gap-3">
+                  <button
+                    type="submit"
+                    class="flex-1 rounded-2xl bg-gradient-to-r from-fuchsia-500 to-indigo-600 px-4 py-3 font-semibold text-white shadow-lg shadow-fuchsia-500/20 transition hover:from-fuchsia-400 hover:to-indigo-500 active:scale-[0.99]"
+                  >
+                    Save constraint
+                  </button>
+                  <button
+                    id="constraint-cancel"
+                    type="button"
+                    class="rounded-2xl border border-slate-700 bg-slate-950/70 px-4 py-3 font-semibold text-slate-200 transition hover:border-slate-500 hover:text-white"
+                  >
+                    Cancel
+                  </button>
+                </div>
+
+                <p
+                  id="constraint-message"
+                  class="min-h-6 text-sm text-rose-300"
+                ></p>
+              </form>
+
+              <div
+                class="theme-panel-soft rounded-2xl border border-slate-800 bg-slate-950/60 p-5"
+              >
+                <div class="flex items-center justify-between gap-4">
+                  <div>
+                    <p
+                      class="text-xs uppercase tracking-[0.25em] text-slate-500"
+                    >
+                      Saved constraints
+                    </p>
+                    <h3 class="mt-2 text-xl font-bold text-white">
+                      Manage existing records
+                    </h3>
+                  </div>
+                  <p id="constraint-count" class="text-sm text-slate-400">
+                    0 records
+                  </p>
+                </div>
+
+                <div id="constraint-list" class="mt-4 grid gap-3"></div>
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
+    </main>
+
+    <script src="/js/admin.js"></script>
+  </body>
+</html>

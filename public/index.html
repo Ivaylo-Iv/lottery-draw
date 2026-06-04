@@ -1,0 +1,204 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Stitch All-in-One Lottery Draw</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <!-- Matter.js Physics Engine -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/matter-js/0.19.0/matter.min.js"></script>
+    <style>
+      /* Custom background animations */
+      @keyframes pulse-slow {
+        0%,
+        100% {
+          transform: scale(1);
+          opacity: 0.2;
+        }
+        50% {
+          transform: scale(1.08);
+          opacity: 0.35;
+        }
+      }
+      .glow-effect {
+        animation: pulse-slow 4s infinite ease-in-out;
+      }
+
+      :root {
+        color-scheme: dark;
+      }
+
+      body[data-theme="light"] {
+        color-scheme: light;
+        background: #f8fafc;
+      }
+
+      body[data-theme="light"] .theme-panel {
+        background: rgba(255, 255, 255, 0.9) !important;
+        border-color: #cbd5e1 !important;
+        box-shadow: 0 24px 60px rgba(15, 23, 42, 0.08) !important;
+      }
+
+      body[data-theme="light"] .theme-panel-soft {
+        background: #f1f5f9 !important;
+        border-color: #cbd5e1 !important;
+      }
+
+      body[data-theme="light"] .theme-title {
+        color: #0f172a !important;
+      }
+
+      body[data-theme="light"] .theme-copy {
+        color: #334155 !important;
+      }
+
+      body[data-theme="light"] .theme-panel .text-white,
+      body[data-theme="light"] .theme-panel .text-slate-100 {
+        color: #0f172a !important;
+      }
+
+      body[data-theme="light"] .theme-panel .text-slate-200,
+      body[data-theme="light"] .theme-panel .text-slate-300 {
+        color: #1e293b !important;
+      }
+
+      body[data-theme="light"] .theme-panel .text-slate-400,
+      body[data-theme="light"] .theme-panel .text-slate-500,
+      body[data-theme="light"] .theme-panel .text-slate-600 {
+        color: #475569 !important;
+      }
+
+      body[data-theme="light"] #winner-display {
+        color: #ffffff !important;
+      }
+    </style>
+  </head>
+  <body
+    data-theme="dark"
+    class="bg-slate-950 text-slate-100 min-h-screen flex flex-col items-center justify-center font-sans overflow-hidden antialiased"
+  >
+    <button
+      id="theme-toggle-btn"
+      type="button"
+      class="fixed right-4 top-4 z-20 rounded-2xl border border-slate-700 bg-slate-950/80 px-4 py-2 text-sm font-semibold text-slate-200 shadow-lg shadow-slate-950/30 backdrop-blur transition hover:border-slate-500 hover:text-white"
+    >
+      Light mode
+    </button>
+
+    <!-- Background Decorative Glows -->
+    <div
+      class="absolute top-1/4 left-1/4 w-96 h-96 bg-blue-600 rounded-full filter blur-3xl glow-effect pointer-events-none"
+    ></div>
+    <div
+      class="absolute bottom-1/4 right-1/4 w-96 h-96 bg-purple-600 rounded-full filter blur-3xl glow-effect pointer-events-none"
+      style="animation-delay: -2s"
+    ></div>
+
+    <!-- Main Container -->
+    <div class="relative z-10 w-full max-w-5xl px-4 flex flex-col items-center">
+      <!-- Header Section -->
+      <header
+        class="theme-panel text-center mb-8 rounded-3xl border border-slate-800/70 bg-slate-900/60 px-6 py-6 backdrop-blur-xl shadow-2xl shadow-slate-950/30"
+      >
+        <h1
+          class="theme-title text-4xl md:text-5xl font-black tracking-wider bg-clip-text text-transparent bg-gradient-to-r from-blue-400 via-indigo-400 to-purple-400 drop-shadow-sm uppercase"
+        >
+          The Grand Draw
+        </h1>
+        <p
+          class="theme-copy text-slate-400 mt-2 text-sm md:text-base font-medium tracking-wide"
+        >
+          Press start to mix the pool and reveal the winning number
+        </p>
+      </header>
+
+      <!-- Main Display: Simulation & Results -->
+      <div
+        class="w-full flex flex-col lg:flex-row gap-10 items-center justify-center"
+      >
+        <!-- Left: The Physics Drum -->
+        <div
+          class="theme-panel relative bg-slate-900/60 p-8 rounded-[2rem] border border-slate-800 backdrop-blur-xl shadow-2xl group transition-all duration-300 hover:border-slate-700/80 lg:min-w-[460px]"
+        >
+          <!-- Outer Glass Circle Frame -->
+          <div
+            class="absolute inset-6 rounded-full border-4 border-dashed border-slate-800 pointer-events-none animate-[spin_120s_linear_infinite]"
+          ></div>
+
+          <!-- Matter.js Canvas Container -->
+          <div
+            id="canvas-container"
+            class="relative rounded-full overflow-hidden border-4 border-slate-700 bg-slate-950/80 shadow-inner mx-auto"
+          >
+            <!-- Subtle inner shadow overlay -->
+            <div
+              class="absolute inset-0 bg-gradient-to-tr from-slate-950/40 via-transparent to-transparent pointer-events-none z-20"
+            ></div>
+          </div>
+        </div>
+
+        <!-- Right: Controls & Live Announcement -->
+        <div
+          class="flex flex-col items-center lg:items-start justify-center w-full max-w-md gap-6"
+        >
+          <!-- Result Card -->
+          <div
+            id="result-card"
+            class="theme-panel w-full bg-slate-900/80 border border-slate-800 rounded-3xl p-6 flex flex-col items-center justify-center text-center opacity-40 transition-all duration-500 min-h-[220px]"
+          >
+            <div
+              id="result-status"
+              class="text-xs font-semibold tracking-widest text-slate-500 uppercase mb-2"
+            >
+              Awaiting Draw
+            </div>
+            <div
+              id="winner-display"
+              class="w-56 h-20 md:w-72 md:h-24 flex items-center justify-center bg-slate-950 rounded-2xl border border-slate-800 text-slate-600 font-black text-3xl md:text-4xl leading-none transition-all duration-500 shadow-inner"
+            >
+              ?
+            </div>
+            <div
+              id="congrats-msg"
+              class="text-sm font-medium text-indigo-400 mt-4 opacity-0 transition-opacity duration-300"
+            >
+              Lucky ticket drawn!
+            </div>
+          </div>
+
+          <!-- Action Button -->
+          <button
+            id="start-btn"
+            class="w-full py-5 px-10 bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white font-black text-xl rounded-[1.5rem] shadow-lg shadow-indigo-500/20 hover:shadow-indigo-500/40 transform active:scale-98 transition-all duration-200 cursor-pointer flex items-center justify-center gap-3 tracking-wide"
+          >
+            <svg
+              id="btn-icon"
+              class="w-6 h-6"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2.5"
+                d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"
+              ></path>
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2.5"
+                d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+              ></path>
+            </svg>
+            <span id="btn-text">Start</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- JavaScript & Physics Setup -->
+    <script src="./js/index.js"></script>
+  </body>
+</html>
