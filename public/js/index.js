@@ -14,6 +14,11 @@ const themeToggleBtn = document.getElementById("theme-toggle-btn");
 const drumRollSound = new Audio("/static/drum-roll.mp3");
 const victorySound = new Audio("/static/victory.mp3");
 
+drumRollSound.volume = 0;
+drumRollSound.muted = true;
+victorySound.volume = 0;
+victorySound.muted = true;
+
 const { Engine, Render, Runner, Bodies, Composite, Body } = Matter;
 const canvasSize = Math.min(window.innerWidth < 640 ? 320 : 420, 420);
 const radius = canvasSize / 2;
